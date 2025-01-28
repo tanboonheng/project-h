@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-api-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: simple-api-app
+  template:
+    metadata:
+      labels:
+        app: simple-api-app
+    spec:
+      containers:
+      - name: simple-api-app
+        image: boonheng12/simple-api-app:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: MONGO_URI
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: uri
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-api-app
+spec:
+  selector:
+    app: simple-api-app
+  ports:
+  - port: 80
+    targetPort: 8000
+  type: ClusterIP
