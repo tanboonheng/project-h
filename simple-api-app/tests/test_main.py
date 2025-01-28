@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from main import app
+from simple_api_app.main import app
 import pytest
 from bson import ObjectId
 
