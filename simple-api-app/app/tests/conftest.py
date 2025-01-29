@@ -8,6 +8,6 @@ from app.main import app
 @pytest.fixture(autouse=True)
 def mock_mongodb_connection(monkeypatch):
     mock_client = MongoClient()
-    monkeypatch.setattr("simple_api_app.main.client", mock_client)
-    monkeypatch.setattr("simple_api_app.main.db", mock_client.products_db)
+    monkeypatch.setattr("app.main.client", mock_client)
+    monkeypatch.setattr("app.main.db", mock_client.products_db)
     return mock_client 
