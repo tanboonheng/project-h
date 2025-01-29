@@ -2,7 +2,7 @@ import pytest
 from mongomock import MongoClient
 import mongomock
 import os
-from simple_api_app.main import app
+from app.main import app
 
 # Override the MongoDB client with mongomock
 @pytest.fixture(autouse=True)
