@@ -96,9 +96,8 @@ jobs:
           sed -i "s|${DOCKER_HUB_REPO}:.*|${DOCKER_HUB_REPO}:${IMAGE_TAG}|" simple-api-deployment.yaml
           
           # Apply Kubernetes manifests
-          kubectl apply -f mongodb-deployment.yaml
-          kubectl apply -f simple-api-deployment.yaml
-          kubectl apply -f ingress.yaml
+          kubectl get ns dev || kubectl create ns dev
+          kubectl apply -f . -n dev
           
           # Wait for deployment to complete
-          kubectl rollout status deployment/simple-api-app
+          kubectl rollout status deployment/simple-api-app -n dev
