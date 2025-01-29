@@ -85,17 +85,17 @@ jobs:
       run: |
         aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER }} --region ${{ env.AWS_REGION }}
     
-    - name: Deploy to EKS
-      env:
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        # Update image tag in deployment file
-        cd kubernetes/simple-api-app
-        sed -i "s|${DOCKER_HUB_REPO}:.*|${DOCKER_HUB_REPO}:${IMAGE_TAG}|" simple-api-deployment.yaml
-        
-        # Apply Kubernetes manifests
-        kubectl get ns dev || kubectl create ns dev
-        kubectl apply -f . -n dev
-        
-        # Wait for deployment to complete
-        kubectl rollout status deployment/simple-api-app -n dev
+        - name: Deploy to EKS
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Update image tag in deployment file
+          cd kubernetes/simple-api-app
+          sed -i "s|${DOCKER_HUB_REPO}:.*|${DOCKER_HUB_REPO}:${IMAGE_TAG}|" simple-api-deployment.yaml
+          
+          # Apply Kubernetes manifests
+          kubectl get ns dev || kubectl create ns dev
+          kubectl apply -f . -n dev
+          
+          # Wait for deployment to complete
+          kubectl rollout status deployment/simple-api-app -n dev
