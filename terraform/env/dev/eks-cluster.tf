@@ -43,8 +43,8 @@ resource "aws_iam_role" "ebs_csi_driver" {
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringEquals = {
-            "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:aud": "sts.amazonaws.com",
-            "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:sub": "system:serviceaccount:kube-system:ebs-csi-controller-sa"
+            "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:aud" : "sts.amazonaws.com",
+            "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:sub" : "system:serviceaccount:kube-system:ebs-csi-controller-sa"
           }
         }
       }
@@ -61,17 +61,8 @@ resource "aws_iam_role_policy_attachment" "ebs_csi_policy" {
 # Update EKS addon configuration
 resource "aws_eks_addon" "ebs" {
   cluster_name             = module.eks.eks_cluster_name
-  addon_name              = "aws-ebs-csi-driver"
+  addon_name               = "aws-ebs-csi-driver"
   service_account_role_arn = aws_iam_role.ebs_csi_driver.arn
-
-  configuration_values = jsonencode({
-    controller = {
-      serviceAccount = {
-        create = false
-        name   = "ebs-csi-controller-sa"
-      }
-    }
-  })
 
   depends_on = [
     aws_iam_role_policy_attachment.ebs_csi_policy,
