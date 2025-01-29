@@ -14,12 +14,10 @@ module "eks" {
 }
 
 
-# Get OIDC thumbprint
 data "tls_certificate" "eks" {
   url = module.eks.cluster_oidc_issuer_url
 }
 
-# Create the OIDC Provider
 resource "aws_iam_openid_connect_provider" "eks" {
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
@@ -31,7 +29,6 @@ resource "aws_iam_openid_connect_provider" "eks" {
   }
 }
 
-# Create IAM role for EBS CSI Driver
 resource "aws_iam_role" "ebs_csi_driver" {
   name = "${var.environment}-ebs-csi-driver"
 
@@ -67,17 +64,18 @@ resource "aws_eks_addon" "ebs" {
   addon_name              = "aws-ebs-csi-driver"
   service_account_role_arn = aws_iam_role.ebs_csi_driver.arn
 
-#  configuration_values = jsonencode({
-#    controller = {
-#      serviceAccount = {
-#        create = false
-#        name   = "ebs-csi-controller-sa"
-#      }
-#    }
-#  })
+  configuration_values = jsonencode({
+    controller = {
+      serviceAccount = {
+        create = false
+        name   = "ebs-csi-controller-sa"
+      }
+    }
+  })
 
   depends_on = [
     aws_iam_role_policy_attachment.ebs_csi_policy,
-    aws_iam_openid_connect_provider.eks
+    aws_iam_openid_connect_provider.eks,
+    module.eks
   ]
 }
