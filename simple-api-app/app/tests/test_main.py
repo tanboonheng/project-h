@@ -1,7 +1,8 @@
 from fastapi.testclient import TestClient
-from app.main import app
+from app.main import app, API_KEY
 import pytest
 from bson import ObjectId
+import os
 
 client = TestClient(app)
 
@@ -12,8 +13,11 @@ test_product = {
     "price": 99.99
 }
 
+# Headers with API key
+headers = {"X-API-Key": os.getenv('API_KEY')}
+
 def test_create_product():
-    response = client.post("/products", json=test_product)
+    response = client.post("/products", json=test_product, headers=headers)
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == test_product["name"]
@@ -22,8 +26,19 @@ def test_create_product():
     assert "id" in data
     return data["id"]
 
+def test_create_product_without_api_key():
+    response = client.post("/products", json=test_product)
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Not authenticated"
+
+def test_create_product_invalid_api_key():
+    invalid_headers = {"X-API-Key": "invalid-key"}
+    response = client.post("/products", json=test_product, headers=invalid_headers)
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Invalid API Key"
+
 def test_read_products():
-    response = client.get("/products")
+    response = client.get("/products", headers=headers)
     assert response.status_code == 200
     assert isinstance(response.json(), list)
 
@@ -32,7 +47,7 @@ def test_read_product():
     product_id = test_create_product()
     
     # Then read it
-    response = client.get(f"/products/{product_id}")
+    response = client.get(f"/products/{product_id}", headers=headers)
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == test_product["name"]
@@ -40,7 +55,7 @@ def test_read_product():
     assert data["price"] == test_product["price"]
 
 def test_read_product_invalid_id():
-    response = client.get("/products/invalid_id")
+    response = client.get("/products/invalid_id", headers=headers)
     assert response.status_code == 400
     assert response.json()["detail"] == "Invalid product ID"
 
@@ -55,7 +70,7 @@ def test_update_product():
         "price": 199.99
     }
     
-    response = client.put(f"/products/{product_id}", json=updated_product)
+    response = client.put(f"/products/{product_id}", json=updated_product, headers=headers)
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == updated_product["name"]
@@ -67,7 +82,7 @@ def test_delete_product():
     product_id = test_create_product()
     
     # Then delete it
-    response = client.delete(f"/products/{product_id}")
+    response = client.delete(f"/products/{product_id}", headers=headers)
     assert response.status_code == 200
     assert response.json()["status"] == "success"
 
