@@ -38,4 +38,6 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./simple-api-app/app/coverage.xml
         flags: unittests
-        fail_ci_if_error: true 
+        fail_ci_if_error: true
+        retry_on_error: true
+        max_retry: 3
