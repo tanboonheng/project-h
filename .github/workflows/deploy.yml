@@ -1,13 +1,14 @@
 name: Build and Deploy to EKS
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'simple-api-app/**'
-      - 'kubernetes/simple-api-app/**'
-  pull_request:
-    branches: [ main ]
+  # push:
+  #   branches: [ main ]
+  workflow_dispatch:
+    # paths:
+    #   - 'simple-api-app/**'
+    #   - 'kubernetes/simple-api-app/**'
+  # pull_request:
+  #   branches: [ main ]
 
 env:
   AWS_REGION: us-east-1              
