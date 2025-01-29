@@ -1,7 +1,7 @@
-module "web_sg" {
+module "eks_cluster_sg" {
   source      = "../../modules/security_group"
-  name        = "${var.environment}-web-sg"
-  description = "Security group for the ${var.environment} web servers"
+  name        = "${var.environment}-eks-cluster-sg"
+  description = "Security group for EKS cluster"
   vpc_id      = module.vpc.vpc_id
 
   ingress_rules = {
@@ -12,21 +12,6 @@ module "web_sg" {
       cidr_blocks = ["0.0.0.0/0"]
       description = "Allow HTTP traffic"
     }
-  }
-
-  tags = {
-    Environment = "${var.environment}"
-    Team        = "devops"
-  }
-}
-
-module "eks_cluster_sg" {
-  source      = "../../modules/security_group"
-  name        = "${var.environment}-eks-cluster-sg"
-  description = "Security group for EKS cluster control plane"
-  vpc_id      = module.vpc.vpc_id
-
-  ingress_rules = {
     api = {
       from_port   = 443
       to_port     = 443
@@ -34,41 +19,13 @@ module "eks_cluster_sg" {
       cidr_blocks = [var.vpc_cidr_block]
       description = "Allow API server access from VPC"
     }
-  }
-
-  tags = {
-    Environment = var.environment
-  }
-}
-
-module "eks_nodes_sg" {
-  source      = "../../modules/security_group"
-  name        = "${var.environment}-eks-nodes-sg"
-  description = "Security group for EKS worker nodes"
-  vpc_id      = module.vpc.vpc_id
-
-  ingress_rules = {
-    cluster_to_node_all_traffic = {
-      from_port   = 0
-      to_port     = 65535
-      protocol    = "-1"
+    cluster_to_node = {
+      from_port   = 10250
+      to_port     = 10250
+      protocol    = "tcp"
       cidr_blocks = [var.vpc_cidr_block]
-      description = "Allow all traffic from cluster"
+      description = "Allow kubelet API access from cluster"
     }
-  }
-  tags = {
-    Environment = var.environment
-    "kubernetes.io/cluster/${var.environment}-eks-cluster" = "owned"
-  }
-}
-
-module "mongodb_sg" {
-  source      = "../../modules/security_group"
-  name        = "${var.environment}-mongodb-sg"
-  description = "Security group for MongoDB in ${var.environment}"
-  vpc_id      = module.vpc.vpc_id
-
-  ingress_rules = {
     mongodb = {
       from_port   = 27017
       to_port     = 27017
@@ -76,22 +33,6 @@ module "mongodb_sg" {
       cidr_blocks = [var.vpc_cidr_block]
       description = "Allow MongoDB traffic within VPC"
     }
-  }
-
-  tags = {
-    Environment = var.environment
-    Team        = "devops"
-    Service     = "mongodb"
-  }
-}
-
-module "api_sg" {
-  source      = "../../modules/security_group"
-  name        = "${var.environment}-api-sg"
-  description = "Security group for the ${var.environment} API service"
-  vpc_id      = module.vpc.vpc_id
-
-  ingress_rules = {
     service_port = {
       from_port   = 80
       to_port     = 80
@@ -108,9 +49,19 @@ module "api_sg" {
     }
   }
 
+  egress_rules = {
+    "all_outbound" = {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow all outbound traffic"
+    }
+  }
+
   tags = {
     Environment = var.environment
     Team        = "devops"
-    Service     = "api"
+    Service     = "eks"
   }
 }
