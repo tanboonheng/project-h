@@ -29,11 +29,12 @@ jobs:
     - name: Run tests
       run: |
         cd simple-api-app/app
+        export PYTHONPATH=$PYTHONPATH:$(pwd)
         pytest --cov=./ --cov-report=xml -v
 
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3
       with:
-        file: ./simple-api-app/coverage.xml
+        file: ./simple-api-app/app/coverage.xml
         flags: unittests
         fail_ci_if_error: true 
