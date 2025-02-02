@@ -67,6 +67,7 @@ docker build -t {DOCKER_HUB_USERNAME}/simple-api-app:latest .
 
 ## Terraform 
 project-h/terraform
+
 Pre-requisite: Create access key on AWS
 Env values required:
 1. EKS_CLUSTER ### Name of EKS cluster
